@@ -1,10 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace AdoNetEntityConsole
+namespace ElectronicLibrary
 {
-    public class AppContext : DbContext
+   public class AppContext : DbContext
     {
         public DbSet<User> Users { get; set; }
+        public DbSet<Book> Books { get; set; }
+        public DbSet<BookLoan> BookLoans { get; set; }
 
         public AppContext() => Database.EnsureCreated();
 
@@ -16,18 +18,28 @@ namespace AdoNetEntityConsole
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Основная таблица
+            // Настройка имен таблиц в нижнем регистре для PostgreSQL
             modelBuilder.Entity<User>().ToTable("users");
+            modelBuilder.Entity<Book>().ToTable("books");
+            modelBuilder.Entity<BookLoan>().ToTable("book_loans");
 
-            // Автоматическое преобразование в нижний регистр
-            foreach (var entity in modelBuilder.Model.GetEntityTypes())
-            {
-                entity.SetTableName(entity.GetTableName().ToLower());
-                foreach (var property in entity.GetProperties())
-                {
-                    property.SetColumnName(property.GetColumnName().ToLower());
-                }
-            }
+            // Уникальность email
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
+
+            // Связи для выдачи книг
+            modelBuilder.Entity<BookLoan>()
+                .HasOne(bl => bl.User)
+                .WithMany(u => u.BookLoans)
+                .HasForeignKey(bl => bl.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<BookLoan>()
+                .HasOne(bl => bl.Book)
+                .WithMany(b => b.Loans)
+                .HasForeignKey(bl => bl.BookId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
