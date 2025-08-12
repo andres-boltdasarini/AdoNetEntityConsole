@@ -18,6 +18,12 @@ namespace ElectronicLibrary
                 var newUser = new User { Name = "Алексей Сидоров", Email = "alex@example.com" };
                 userRepo.Add(newUser);
 
+                    var user1 = new User { Name = "Alice", Email = "alex@example.com" };
+    var user2 = new User { Name = "Bob", Email = "alex@example.com" };
+    var user3 = new User { Name = "Bruce", Email = "alex@example.com" };
+
+    userRepo.AddRange(user2, user3);
+
                 // Обновление имени пользователя
                 userRepo.UpdateUserName(1, "Иван Иванович Иванов");
 

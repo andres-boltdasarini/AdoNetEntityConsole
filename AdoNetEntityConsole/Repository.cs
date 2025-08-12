@@ -40,6 +40,12 @@ namespace ElectronicLibrary
             _context.SaveChanges();
         }
 
+        public void AddRange(User user, User user2)
+        {
+            _context.Users.AddRange(user, user2);
+            _context.SaveChanges();
+        }
+
         // Удаление пользователя
         public void Delete(User user)
         {
