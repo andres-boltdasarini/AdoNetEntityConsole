@@ -13,7 +13,6 @@ namespace ElectronicLibrary
 
         public AppContext()
         {
-            Database.EnsureDeleted();
             Database.EnsureCreated();
         }
 

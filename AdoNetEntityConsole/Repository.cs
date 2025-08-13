@@ -66,6 +66,21 @@ namespace ElectronicLibrary
                 _context.SaveChanges();
             }
         }
+            public bool IsBookBorrowedByUser(int userId, int bookId)
+    {
+        return _context.Users
+            .Include(u => u.BorrowedBooks)
+            .Any(u => u.Id == userId && u.BorrowedBooks.Any(b => b.Id == bookId));
+    }
+
+    // 6. Получать количество книг на руках у пользователя
+    public int GetBorrowedBooksCountByUser(int userId)
+    {
+        return _context.Users
+            .Include(u => u.BorrowedBooks)
+            .FirstOrDefault(u => u.Id == userId)?
+            .BorrowedBooks.Count ?? 0;
+    }
     }
 
     public class BookRepository
@@ -109,30 +124,84 @@ namespace ElectronicLibrary
         }
         
         // Добавить автора к книге
-        public void AddAuthorToBook(int bookId, int authorId)
-        {
-            var book = _context.Books.Include(b => b.BookAuthors).FirstOrDefault(b => b.Id == bookId);
-            var author = _context.Authors.FirstOrDefault(a => a.Id == authorId);
-            
-            if (book != null && author != null)
-            {
-                book.BookAuthors.Add(new BookAuthor { BookId = bookId, AuthorId = authorId });
-                _context.SaveChanges();
-            }
-        }
+public void AddAuthorToBook(int bookId, int authorId)
+{
+    var exists = _context.BookAuthors
+        .Any(ba => ba.BookId == bookId && ba.AuthorId == authorId);
+    
+    if (!exists)
+    {
+        _context.BookAuthors.Add(new BookAuthor { BookId = bookId, AuthorId = authorId });
+        _context.SaveChanges();
+    }
+}
         
         // Добавить жанр к книге
-        public void AddGenreToBook(int bookId, int genreId)
-        {
-            var book = _context.Books.Include(b => b.BookGenres).FirstOrDefault(b => b.Id == bookId);
-            var genre = _context.Genres.FirstOrDefault(g => g.Id == genreId);
-            
-            if (book != null && genre != null)
-            {
-                book.BookGenres.Add(new BookGenre { BookId = bookId, GenreId = genreId });
-                _context.SaveChanges();
-            }
-        }
+public void AddGenreToBook(int bookId, int genreId)
+{
+    var exists = _context.BookGenres
+        .Any(bg => bg.BookId == bookId && bg.GenreId == genreId);
+    
+    if (!exists)
+    {
+        _context.BookGenres.Add(new BookGenre { BookId = bookId, GenreId = genreId });
+        _context.SaveChanges();
+    }
+}
+            public List<Book> GetBooksByGenreAndYearRange(int genreId, int startYear, int endYear)
+    {
+        return _context.Books
+            .Include(b => b.BookGenres)
+            .Where(b => b.BookGenres.Any(bg => bg.GenreId == genreId)) 
+            .Where(b => b.PublicationYear >= startYear && b.PublicationYear <= endYear)
+            .ToList();
+    }
+
+    // 2. Получать количество книг определенного автора в библиотеке
+    public int GetBooksCountByAuthor(int authorId)
+    {
+        return _context.BookAuthors
+            .Count(ba => ba.AuthorId == authorId);
+    }
+
+    // 3. Получать количество книг определенного жанра в библиотеке
+    public int GetBooksCountByGenre(int genreId)
+    {
+        return _context.BookGenres
+            .Count(bg => bg.GenreId == genreId);
+    }
+
+    // 4. Проверять есть ли книга определенного автора и с определенным названием в библиотеке
+    public bool IsBookExistsByAuthorAndTitle(int authorId, string title)
+    {
+        return _context.Books
+            .Include(b => b.BookAuthors)
+            .Any(b => b.Title == title && b.BookAuthors.Any(ba => ba.AuthorId == authorId));
+    }
+
+    // 7. Получение последней вышедшей книги
+    public Book GetLatestPublishedBook()
+    {
+        return _context.Books
+            .OrderByDescending(b => b.PublicationYear)
+            .FirstOrDefault();
+    }
+
+    // 8. Получение списка всех книг, отсортированного в алфавитном порядке по названию
+    public List<Book> GetAllBooksOrderedByTitle()
+    {
+        return _context.Books
+            .OrderBy(b => b.Title)
+            .ToList();
+    }
+
+    // 9. Получение списка всех книг, отсортированного в порядке убывания года их выхода
+    public List<Book> GetAllBooksOrderedByYearDesc()
+    {
+        return _context.Books
+            .OrderByDescending(b => b.PublicationYear)
+            .ToList();
+    }
     }
     
     public class AuthorRepository

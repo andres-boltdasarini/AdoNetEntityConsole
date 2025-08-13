@@ -67,6 +67,36 @@ namespace ElectronicLibrary
 
                 // Возврат книги
                 userRepo.ReturnBook(1);
+                var scifiBooks = bookRepo.GetBooksByGenreAndYearRange(genre2.Id, 1960, 1970);
+
+// 2. Получить количество книг Булгакова в библиотеке
+var bulgakovBooksCount = bookRepo.GetBooksCountByAuthor(author1.Id);
+
+// 3. Получить количество книг в жанре "Роман"
+var novelBooksCount = bookRepo.GetBooksCountByGenre(genre1.Id);
+
+// 4. Проверить есть ли книга "Мастер и Маргарита" Булгакова в библиотеке
+var isMasterExists = bookRepo.IsBookExistsByAuthorAndTitle(author1.Id, "Мастер и Маргарита");
+
+// 5. Проверить есть ли книга с ID=1 на руках у пользователя с ID=1
+var isBookBorrowed = userRepo.IsBookBorrowedByUser(1, 1);
+
+// 6. Получить количество книг на руках у пользователя с ID=1
+var borrowedCount = userRepo.GetBorrowedBooksCountByUser(1);
+
+// 7. Получить последнюю вышедшую книгу
+var latestBook = bookRepo.GetLatestPublishedBook();
+
+// 8. Получить все книги, отсортированные по названию
+var booksByTitle = bookRepo.GetAllBooksOrderedByTitle();
+
+// 9. Получить все книги, отсортированные по году выхода (по убыванию)
+var booksByYear = bookRepo.GetAllBooksOrderedByYearDesc();
+
+foreach (var book in booksByYear){
+            Console.WriteLine($"Название: {book.Title}");
+        Console.WriteLine($"Год издания: {book.PublicationYear}");
+}
             }
         }
     }
