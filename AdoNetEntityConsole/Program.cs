@@ -1,6 +1,7 @@
 ﻿using ElectronicLibrary;
 using Microsoft.EntityFrameworkCore;
-
+using System;
+using System.Linq;
 
 namespace ElectronicLibrary
 {
@@ -13,34 +14,60 @@ namespace ElectronicLibrary
                 // Создание репозиториев
                 var userRepo = new UserRepository(db);
                 var bookRepo = new BookRepository(db);
+                var authorRepo = new AuthorRepository(db);
+                var genreRepo = new GenreRepository(db);
 
-                // Добавление пользователя
-                var newUser = new User { Name = "Алексей Сидоров", Email = "alex@example.com" };
-                userRepo.Add(newUser);
+                // Добавление пользователей
+                var user1 = new User { Name = "Alice", Email = "alice@example.com" };
+                var user2 = new User { Name = "Bob", Email = "bob@example.com" };
+                userRepo.AddRange(user1, user2);
 
-                    var user1 = new User { Name = "Alice", Email = "alex@example.com" };
-    var user2 = new User { Name = "Bob", Email = "alex@example.com" };
-    var user3 = new User { Name = "Bruce", Email = "alex@example.com" };
+                // Добавление авторов
+                var author1 = new Author { Name = "Михаил Булгаков" };
+                var author2 = new Author { Name = "Лев Толстой" };
+                authorRepo.Add(author1);
+                authorRepo.Add(author2);
 
-    userRepo.AddRange(user2, user3);
+                // Добавление жанров
+                var genre1 = new Genre { Name = "Роман" };
+                var genre2 = new Genre { Name = "Фантастика" };
+                genreRepo.Add(genre1);
+                genreRepo.Add(genre2);
 
-                // Обновление имени пользователя
-                userRepo.UpdateUserName(1, "Иван Иванович Иванов");
+                // Добавление книг
+                var book1 = new Book { Title = "Мастер и Маргарита", PublicationYear = 1966 };
+                var book2 = new Book { Title = "Война и мир", PublicationYear = 1869 };
+                bookRepo.Add(book1);
+                bookRepo.Add(book2);
 
-                // Добавление книги
-                var newBook = new Book { Title = "Мастер и Маргарита", PublicationYear = 1966 };
-                bookRepo.Add(newBook);
+                // Добавление авторов к книгам
+                bookRepo.AddAuthorToBook(1, 1); // Булгаков -> Мастер и Маргарита
+                bookRepo.AddAuthorToBook(2, 2); // Толстой -> Война и мир
 
-                // Обновление года книги
-                bookRepo.UpdateBookYear(1, 1870);
+                // Добавление жанров к книгам
+                bookRepo.AddGenreToBook(1, 1); // Мастер и Маргарита -> Роман
+                bookRepo.AddGenreToBook(1, 2); // Мастер и Маргарита -> Фантастика
+                bookRepo.AddGenreToBook(2, 1); // Война и мир -> Роман
 
-                // Получение книги по ID
-                var book = bookRepo.GetById(1);
-                Console.WriteLine($"Обновленная книга: {book.Title} ({book.PublicationYear})");
+                // Выдача книги пользователю
+                userRepo.BorrowBook(1, 1); // Alice берет Мастер и Маргарита
 
-                // Удаление книги
-                bookRepo.Delete(bookRepo.GetById(3));
+                // Получение информации о пользователе и его книгах
+                var alice = userRepo.GetById(1);
+                Console.WriteLine($"Пользователь: {alice.Name}");
+                Console.WriteLine("Взятые книги:");
+                foreach (var book in alice.BorrowedBooks)
+                {
+                    Console.WriteLine($"- {book.Title} ({book.PublicationYear})");
+                    Console.WriteLine("  Авторы: " + string.Join(", ", 
+                        book.BookAuthors.Select(ba => ba.Author.Name)));
+                    Console.WriteLine("  Жанры: " + string.Join(", ", 
+                        book.BookGenres.Select(bg => bg.Genre.Name)));
+                }
+
+                // Возврат книги
+                userRepo.ReturnBook(1);
             }
         }
     }
-}     
+}
