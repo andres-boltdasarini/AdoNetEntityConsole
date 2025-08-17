@@ -26,8 +26,11 @@ namespace ElectronicLibrary
             var user = _context.Users.Include(u => u.BorrowedBooks).First(u => u.Id == userId);
             var book = _context.Books.First(b => b.Id == bookId);
 
-            user.BorrowedBooks.Add(book);
-            _context.SaveChanges();
+            if (user != null && book != null)
+            {
+                user.BorrowedBooks.Add(book);
+                _context.SaveChanges();
+            }
         }
 
         public void ReturnBook(int userId, int bookId)
@@ -35,8 +38,25 @@ namespace ElectronicLibrary
             var user = _context.Users.Include(u => u.BorrowedBooks).First(u => u.Id == userId);
             var book = user.BorrowedBooks.First(b => b.Id == bookId);
 
-            user.BorrowedBooks.Remove(book);
-            _context.SaveChanges();
+            if (book != null)
+            {
+                user.BorrowedBooks.Remove(book);
+                _context.SaveChanges();
+            }
+        }
+
+        public bool IsBookBorrowedByUser(int userId, int bookId)
+        {
+            return _context.Users
+                .Any(u => u.Id == userId && u.BorrowedBooks.Any(b => b.Id == bookId));
+        }
+
+        public int GetBorrowedBooksCountByUser(int userId)
+        {
+            return _context.Users
+                .Where(u => u.Id == userId)
+                .Select(u => u.BorrowedBooks.Count)
+                .FirstOrDefault();
         }
     }
 }

@@ -33,11 +33,20 @@ class Program
 
             bookRepo.AddGenreToBook(book1.Id, genre1.Id); 
             bookRepo.AddGenreToBook(book1.Id, genre2.Id); 
-            bookRepo.AddGenreToBook(book2.Id, genre1.Id); 
+            bookRepo.AddGenreToBook(book2.Id, genre1.Id);
+
+            var scifiBooks = bookRepo.GetBooksByGenreAndYearRange(genre2.Id, 1960, 1970);
+            var bulgakovBooksCount = bookRepo.GetBooksCountByAuthor(author1.Id);
+            var novelBooksCount = bookRepo.GetBooksCountByGenre(genre1.Id);
+            var isMasterExists = bookRepo.IsBookExistsByAuthorAndTitle(author1.Id, "Мастер и Маргарита");
+            var isBookBorrowed = userRepo.IsBookBorrowedByUser(1, 1);
+            var borrowedCount = userRepo.GetBorrowedBooksCountByUser(1);
+            var latestBook = bookRepo.GetLatestPublishedBook();
+            var booksByTitle = bookRepo.GetAllBooksOrderedByTitle();
+            var booksByYear = bookRepo.GetAllBooksOrderedByYearDesc();
 
             var user = new User { Name = "Иван Иванов", Email = "ivan@example.com" };
             userRepo.Add(user);
-
             userRepo.BorrowBook(user.Id, book1.Id);
 
             var userWithBooks = userRepo.GetById(user.Id);
