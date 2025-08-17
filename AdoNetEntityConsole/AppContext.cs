@@ -15,6 +15,7 @@ public class AppContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=ent;Username=postgres;Password=1");
+        optionsBuilder.UseSqlServer(@"Data Source=.\SQLEXPRESS;Database=ent;
+              Trusted_Connection=True;TrustServerCertificate=True;");
     }
 }
